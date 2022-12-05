@@ -7,103 +7,156 @@
 
   <!-- This contains the metadata for the project-->
   <head>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link rel = "stylesheet" href="styling.css">
+    
   </head>
 
 
   <body>
 
+    <!-- Header of the application -->
     <div id="myDIV" class="header">
 
       <h2 style="margin:5px">Advanced To-Do List!</h2>
-
       <input type="text" id="myInput" placeholder="Title...">
+
       <span onclick="newElement()" class="addBtn">Add</span>
       <button id="authorize_button" class = "btn" onclick="handleAuthClick()">Authorize</button>
       <span onclick="newElement()" class="btn">Add List to Google Calendar</span>
-      <span onclick="newElement()" class="btn">Email List to Myself</span>
+      <button id="email_btn" class = "btn" onclick="sendEmail()">Email List to Myself</button>
     </div>
 
-    
+    <!-- List that holds new tasks-->
     <ul id="myUL">
-      
-      <!-- code below could set initial values-->
-      <!--
-      <li>Hit the gym</li>
-      <li class="checked">Pay bills</li>
-      <li>Meet George</li>
-      <li>Buy eggs</li>
-      <li>Read a book</li>
-      <li>Organize office</li>
-      -->
       
     </ul>
     
-    
+    <!-- This is the JavaScript to implement APIs/button functionality-->
     <script>
-    //type=javascript?
 
-    // Create a "close" button and append it to each list item
-    var myNodelist = document.getElementsByTagName("LI");
-    var i;
-    for (i = 0; i < myNodelist.length; i++) {
-      var span = document.createElement("SPAN");
-      var txt = document.createTextNode("\u00D7");
-      span.className = "close";
-      span.appendChild(txt);
-      myNodelist[i].appendChild(span);
-    }
+      //-----------------------------------------------------------------
+      //                 TO-DO LIST FUNCTIONALITY BELOW
+      //-----------------------------------------------------------------
 
-    // Click on a close button to hide the current list item
-    var close = document.getElementsByClassName("close");
-    var i;
-    for (i = 0; i < close.length; i++) {
-      close[i].onclick = function() {
-        var div = this.parentElement;
-        div.style.display = "none";
+      // Create a "close" button and append it to each list item
+      var myNodelist = document.getElementsByTagName("LI");
+      for (var i = 0; i < myNodelist.length; i++) {
+
+        var span = document.createElement("SPAN");
+        var txt = document.createTextNode("\u00D7");
+        span.className = "close";
+        span.appendChild(txt);
+        myNodelist[i].appendChild(span);
       }
-    }
 
-    // Add a "checked" symbol when clicking on a list item
-    var list = document.querySelector('ul');
-    list.addEventListener('click', function(ev) {
-      if (ev.target.tagName === 'LI') {
-        ev.target.classList.toggle('checked');
-      }
-    }, false);
+      // Click on a close button to hide the current list item
+      var close = document.getElementsByClassName("close");
+      for (var i = 0; i < close.length; i++) {
 
-    // Create a new list item when clicking on the "Add" button
-    function newElement() {
-      var li = document.createElement("li");
-      var inputValue = document.getElementById("myInput").value;
-      var t = document.createTextNode(inputValue);
-      li.appendChild(t);
-      if (inputValue === '') {
-        alert("You must write something!");
-      } else {
-        document.getElementById("myUL").appendChild(li);
-      }
-      document.getElementById("myInput").value = "";
-
-      var span = document.createElement("SPAN");
-      var txt = document.createTextNode("\u00D7");
-      span.className = "close";
-      span.appendChild(txt);
-      li.appendChild(span);
-
-      for (i = 0; i < close.length; i++) {
         close[i].onclick = function() {
+
           var div = this.parentElement;
           div.style.display = "none";
         }
       }
-    }
 
-    //CODE BELOW INITIALIZES GOOGLE API FOR BOTH CALENDAR & GMAIL
+      // Add a "checked" symbol when clicking on a list item
+      var list = document.querySelector('ul');
+      list.addEventListener('click', function(ev) {
+
+        if (ev.target.tagName === 'LI') {
+          ev.target.classList.toggle('checked');
+        }
+
+      }, false);
+
+      // Create a new list item when clicking on the "Add" button
+      function newElement() {
+
+        var li = document.createElement("li");
+        var inputValue = document.getElementById("myInput").value;
+        var t = document.createTextNode(inputValue);
+
+        li.appendChild(t);
+        if (inputValue === ''){
+
+          alert("You must write something!");
+        }else{
+
+          document.getElementById("myUL").appendChild(li);
+        }
+
+        document.getElementById("myInput").value = "";
+
+        var span = document.createElement("SPAN");
+        var txt = document.createTextNode("\u00D7");
+        span.className = "close";
+        span.appendChild(txt);
+        li.appendChild(span);
+
+        for (i = 0; i < close.length; i++) {
+
+          close[i].onclick = function() {
+
+            var div = this.parentElement;
+            div.style.display = "none";
+          }
+        }
+      }
+
+      //-----------------------------------------------------------------
+      //                      GOOGLE GMAIL API BELOW
+      //-----------------------------------------------------------------
+      
+      //sendEmail(): sends an email to the user containing the to do list tasks
+      function sendEmail() {
+
+        //set email metadata from list
+        var to = 'mathew7@g.clemson.edu';
+        var subject = 'api';
+        var body = 'hello world';
+
+        //to do: loop through item list and put tasks into message body
+        
+
+        //create an instance of the api
+        var client = new gapi.client.gmail.users.messages.send({
+
+          'userId': 'me',
+          'resource': {
+            'raw': createMessage(to, subject, body)
+          }
+        });
+
+          //send the message and handle callback function
+          client.execute(function (response) {
+            console.log(response);
+          });
+      }
+      
+      //createMessage(): cerates the actual message sent to user & encodes it
+      function createMessage(to, subject, body) {
+
+        // encode email for google
+        var str = ['To: ' + to,
+          'Subject: ' + subject,
+          'Content-Type: text/plain; charset="UTF-8"',
+          'MIME-Version: 1.0',
+          'Content-Transfer-Encoding: 7bit',
+          '',
+          body].join('\r\n').trim();
+
+          return btoa(str).replace(/\+/g, '-').replace(/\//g, '_');
+        }
+
+      //-----------------------------------------------------------------
+      //            GOOGLE API AUTHENTIFICATION BELOW
+      //-----------------------------------------------------------------
     
-    // TODO(developer): Set to client ID and API key from the Developer Console
-    const CLIENT_ID = '305697776658-fkv3snta24o9o9uffgakomav86f7dqvh.apps.googleusercontent.com';
+      // TODO(developer): Set to client ID and API key from the Developer Console
+      const CLIENT_ID = '305697776658-fkv3snta24o9o9uffgakomav86f7dqvh.apps.googleusercontent.com';
       const API_KEY = 'AIzaSyCXDgPMOYRdMSs41_uP0WaVerIbGvXhvVg';
 
       // Discovery doc URL for APIs used by the quickstart
@@ -111,7 +164,9 @@
 
       // Authorization scopes required by the API; multiple scopes can be
       // included, separated by spaces.
-      const SCOPES = 'https://www.googleapis.com/auth/gmail.readonly';
+      const SCOPES = 
+      'https://www.googleapis.com/auth/gmail.readonly ' + 
+      'https://www.googleapis.com/auth/gmail.send'
 
       let tokenClient;
       let gapiInited = false;
@@ -121,111 +176,76 @@
       document.getElementById('signout_button').style.visibility = 'hidden';
 
       /**
-       * Callback after api.js is loaded.
-       */
+      * Callback after api.js is loaded.
+      */
       function gapiLoaded() {
         gapi.load('client', initializeGapiClient);
       }
 
       /**
-       * Callback after the API client is loaded. Loads the
-       * discovery doc to initialize the API.
-       */
+        * Callback after the API client is loaded. Loads the
+        * discovery doc to initialize the API.
+      */
       async function initializeGapiClient() {
+
         await gapi.client.init({
           apiKey: API_KEY,
           discoveryDocs: [DISCOVERY_DOC],
         });
+
         gapiInited = true;
         maybeEnableButtons();
-      }
-
-      /**
-       * Callback after Google Identity Services are loaded.
-       */
-      function gisLoaded() {
-        tokenClient = google.accounts.oauth2.initTokenClient({
-          client_id: CLIENT_ID,
-          scope: SCOPES,
-          callback: '', // defined later
-        });
-        gisInited = true;
-        maybeEnableButtons();
-      }
-
-      /**
-       * Enables user interaction after all libraries are loaded.
-       */
-      function maybeEnableButtons() {
-        if (gapiInited && gisInited) {
-          document.getElementById('authorize_button').style.visibility = 'visible';
         }
-      }
 
-      /**
-       *  Sign in the user upon button click.
-       */
-      function handleAuthClick() {
-        tokenClient.callback = async (resp) => {
-          if (resp.error !== undefined) {
-            throw (resp);
-          }
-          document.getElementById('signout_button').style.visibility = 'visible';
-          document.getElementById('authorize_button').innerText = 'Refresh';
-          await listLabels();
-        };
-
-        if (gapi.client.getToken() === null) {
-          // Prompt the user to select a Google Account and ask for consent to share their data
-          // when establishing a new session.
-          tokenClient.requestAccessToken({prompt: 'consent'});
-        } else {
-          // Skip display of account chooser and consent dialog for an existing session.
-          tokenClient.requestAccessToken({prompt: ''});
-        }
-      }
-
-      /**
-       *  Sign out the user upon button click.
-       */
-      function handleSignoutClick() {
-        const token = gapi.client.getToken();
-        if (token !== null) {
-          google.accounts.oauth2.revoke(token.access_token);
-          gapi.client.setToken('');
-          document.getElementById('content').innerText = '';
-          document.getElementById('authorize_button').innerText = 'Authorize';
-          document.getElementById('signout_button').style.visibility = 'hidden';
-        }
-      }
-
-      /**
-       * Print all Labels in the authorized user's inbox. If no labels
-       * are found an appropriate message is printed.
-       */
-      async function listLabels() {
-        let response;
-        try {
-          response = await gapi.client.gmail.users.labels.list({
-            'userId': 'me',
+        /**
+         * Callback after Google Identity Services are loaded.
+         */
+        function gisLoaded() {
+          tokenClient = google.accounts.oauth2.initTokenClient({
+            client_id: CLIENT_ID,
+            scope: SCOPES,
+            callback: '', // defined later
           });
-        } catch (err) {
-          document.getElementById('content').innerText = err.message;
-          return;
+          gisInited = true;
+          maybeEnableButtons();
         }
-        const labels = response.result.labels;
-        if (!labels || labels.length == 0) {
-          document.getElementById('content').innerText = 'No labels found.';
-          return;
+
+        /**
+         * Enables user interaction after all libraries are loaded.
+         */
+        function maybeEnableButtons() {
+          if (gapiInited && gisInited) {
+            document.getElementById('authorize_button').style.visibility = 'visible';
+          }
         }
-        // Flatten to string to display
-        const output = labels.reduce(
-            (str, label) => `${str}${label.name}\n`,
-            'Labels:\n');
-        document.getElementById('content').innerText = output;
-      }
-    </script>
-    <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
-    <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
+        /**
+         *  Sign in the user upon button click.
+         */
+        function handleAuthClick() {
+          tokenClient.callback = async (resp) => {
+            if (resp.error !== undefined) {
+              throw (resp);
+            }
+            document.getElementById('signout_button').style.visibility = 'visible';
+            document.getElementById('authorize_button').innerText = 'Refresh';
+            await listLabels();
+          };
+
+          if (gapi.client.getToken() === null) {
+            // Prompt the user to select a Google Account and ask for consent to share their data
+            // when establishing a new session.
+            tokenClient.requestAccessToken({prompt: 'consent'});
+          } else {
+            // Skip display of account chooser and consent dialog for an existing session.
+            tokenClient.requestAccessToken({prompt: ''});
+          }
+        }
+      </script>
+
+      <!-- Google API JavaScript libraries below -->
+      <script async defer src="https://apis.google.com/js/api.js" onload="gapiLoaded()"></script>
+      <script async defer src="https://accounts.google.com/gsi/client" onload="gisLoaded()"></script>
+
   </body>
 </html>
