@@ -29,7 +29,7 @@
     </div>
 
     <!-- List that holds new tasks-->
-    <ul id="myUL">
+    <ul id = "myUL">
       
     </ul>
     
@@ -107,7 +107,7 @@
       }
 
       //-----------------------------------------------------------------
-      //                      GOOGLE GMAIL API BELOW
+      //                      GOOGLE GMAIL API BELOW - John
       //-----------------------------------------------------------------
       
       //sendEmail(): sends an email to the user containing the to do list tasks
@@ -115,11 +115,22 @@
 
         //set email metadata from list
         var to = 'mathew7@g.clemson.edu';
-        var subject = 'api';
-        var body = 'hello world';
+        var subject = 'Advanced To-Do List Tasks';
+        var body = 'Here are your tasks from Advanced To-Do List!\n\n';
 
         //to do: loop through item list and put tasks into message body
-        
+        var list = document.getElementById("myUL");
+        var items = Array.from(list.children)
+        for (var i = 0; i < items.length; i++){
+          
+          //format tasks in email
+          body += (i + 1) + ") ";
+          body += items[i].innerText;
+          body += "\n";
+          
+          //this gets rid of a unicode character that is being annoying
+          body = body.replace("\u00D7", "");
+        }
 
         //create an instance of the api
         var client = new gapi.client.gmail.users.messages.send({
@@ -130,10 +141,13 @@
           }
         });
 
-          //send the message and handle callback function
-          client.execute(function (response) {
-            console.log(response);
-          });
+        //send the message and handle callback function
+        client.execute(function (response) {
+          console.log(response);
+        });
+          
+        //tell user that the email has been sent
+        alert("An email has been sent to your inbox.")
       }
       
       //createMessage(): cerates the actual message sent to user & encodes it
